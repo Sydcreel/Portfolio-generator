@@ -13,15 +13,116 @@ const profileDataArgs = process.argv.slice(2);
 //array index (0 index array, "name" starts at 0)
 const [name, github] = profileDataArgs;
 
-inquirer
-  .prompt([
+//Profile questions
+const promptUser = () => {
+  return inquirer.prompt([
     {
       type: 'input',
-      name: 'name',
-      message: 'What is your name?'
+      name: 'Name',
+      message: 'What is your name? (Required)',
+      validate: nameInput => {
+        if (nameInput) {
+          return true;
+        } else {
+          console.log('Please enter your name.');
+        }
+      }
+    },
+    {
+      type: 'input',
+      name: 'Github',
+      message: 'Enter your Github username (Required)',
+      validate: githubInput => {
+        if (githubInput) {
+          return true;
+        } else {
+          console.log('Please enter your Github username.');
+          return false;
+        }
+      }
+    },
+    {
+      type: 'confirm',
+      name: 'confirmAbout',
+      message: 'Would you like to enter information about yourself for an "About" section?',
+      default: true
+    },
+    {
+      type: 'input',
+      name: 'About',
+      message: 'Provide some information about yourself',
+    when: ({confirmAbout}) => confirmAbout
+  }
+  ]);
+};
+
+//Project questions
+const promptProject = portfolioData => {
+  console.log(`
+  =================
+  Add a New Project
+  =================
+    `);
+  //if no Projects array property, create one
+  if (!portfolioData.projects) {
+    //add Projects array and initialize function to collect data
+    portfolioData.projects = [];
     }
-  ])
-  .then(answers => console.log(answers));
+  }
+  return inquirer.prompt([
+    {
+      type: 'input',
+      name: 'Name',
+      message: 'What is the name of your project?'
+    },
+    {
+      type: 'input',
+      name: 'Description',
+      message: 'Provide a description of the project (Required)'
+    },
+    {
+      type: 'checkbox',
+      name: 'Languages',
+      message: 'What did you build this project with? (Check all that apply)',
+      choices: ['JavaScript', 'HTML', 'CSS', 'ES6', 'jQuery', 'Bootstrap', 'Node']
+    },
+    {
+      type: 'input',
+      name: 'Link',
+      message: 'Enter the Github link to your project (Required)'
+    },
+    {
+      type: 'confirm',
+      name: 'Feature',
+      message: 'Would you like to feature this project?',
+      default: false
+    },
+    {
+      type: 'confirm',
+      name: 'confirmAddProject',
+      message: 'Would you like to enter another project?',
+      deafult: false
+    }
+  ]
+  //projectData: answer object  confirmAddProject: property
+  //if user wishes to add more projects, condition = true and calls promptProject(portfolioData) function
+  .then(projectData => {
+    portfolioData.projects.push(projectData);
+    //condition that will call promptProject(portfolioData) function when confirmAddProject = true
+    if (projectData.confirmAddProject) {
+      return promptProject(portfolioData);
+      //if user decides to not add more projects, condition = false
+    } else {
+      return portfolioData;
+    }
+  }));
+
+//display input in order: Profile questions, Project questions
+promptUser()
+  .then(promptProject)
+  .then(projectData => {
+    console.log(portfolioData);
+  });
 
 
 //arguments: 1-name of file being created(output file), 2-data being written onto file(HTML string), 3-callback function used for error handling
