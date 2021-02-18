@@ -25,6 +25,7 @@ const promptUser = () => {
           return true;
         } else {
           console.log('Please enter your name.');
+          return false;
         }
       }
     },
@@ -51,7 +52,7 @@ const promptUser = () => {
       type: 'input',
       name: 'About',
       message: 'Provide some information about yourself',
-    when: ({confirmAbout}) => confirmAbout
+      when: ({confirmAbout}) => confirmAbout
   }
   ]);
 };
@@ -67,18 +68,33 @@ const promptProject = portfolioData => {
   if (!portfolioData.projects) {
     //add Projects array and initialize function to collect data
     portfolioData.projects = [];
-    }
   }
   return inquirer.prompt([
     {
       type: 'input',
       name: 'Name',
-      message: 'What is the name of your project?'
+      message: 'What is the name of your project? (Required)',
+      validate: nameInput => {
+        if (nameInput) {
+          return true;
+        } else {
+          console.log('Please enter the name of your project.');
+          return false;
+        }
+      }
     },
     {
       type: 'input',
       name: 'Description',
-      message: 'Provide a description of the project (Required)'
+      message: 'Provide a description of the project (Required)',
+      validate: descriptionInput => {
+        if (descriptionInput) {
+          return true;
+        } else {
+          console.log('Please enter a project description.');
+          return false;
+        }
+      }
     },
     {
       type: 'checkbox',
@@ -89,7 +105,15 @@ const promptProject = portfolioData => {
     {
       type: 'input',
       name: 'Link',
-      message: 'Enter the Github link to your project (Required)'
+      message: 'Enter the Github link to your project (Required)',
+      validate: linkInput => {
+        if (linkInput) {
+          return true;
+          } else {
+            console.log('Please enter a link to your Github.');
+            return false;
+          }
+        }
     },
     {
       type: 'confirm',
@@ -103,7 +127,7 @@ const promptProject = portfolioData => {
       message: 'Would you like to enter another project?',
       deafult: false
     }
-  ]
+  ])
   //projectData: answer object  confirmAddProject: property
   //if user wishes to add more projects, condition = true and calls promptProject(portfolioData) function
   .then(projectData => {
@@ -115,8 +139,8 @@ const promptProject = portfolioData => {
     } else {
       return portfolioData;
     }
-  }));
-
+  });
+};
 //display input in order: Profile questions, Project questions
 promptUser()
   .then(promptProject)
